@@ -8,9 +8,20 @@ const userRole = require("../userRole");
 const checkUserExists = () => {
   return check("email").custom(async (email) => {
     const user = await User.findOne({ email });
+    if (user) {
+      return Promise.reject(new ApiError("Wrong Email or Password", 400));
+    }
+    return true;
+  });
+};
+
+const checkUserNotExists = () => {
+  return check("email").custom(async (email) => {
+    const user = await User.findOne({ email });
     if (!user) {
       return Promise.reject(new ApiError("Wrong Email or Password", 400));
     }
+    req.user = user;
     return true;
   });
 };
@@ -18,7 +29,7 @@ const checkUserExists = () => {
 const isStrongPassword = (fieldName = "password") =>
   check(fieldName).custom((value) => {
     if (!StrongPassword(value)) {
-      return new ApiError(
+      throw new ApiError(
         "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
         400
       );
@@ -39,12 +50,12 @@ exports.validateSignup = [
     .isIn([userRole.ADMIN, userRole.User])
     .withMessage(`Role must be either ${userRole.ADMIN} or ${userRole.User}`),
   check("password").notEmpty().withMessage("role is required"),
-  isStrongPassword("password"),
+  isStrongPassword("password"),checkUserExists(),
   validationMiddleWare,
 ];
 exports.validateLogin = [
   check("email").isEmail().withMessage("Invalid email"),
-  checkUserExists(),
+  checkUserNotExists(),
   validationMiddleWare,
 ];
 exports.validateForgotPassword = [

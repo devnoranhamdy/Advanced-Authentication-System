@@ -11,43 +11,28 @@ const crypto = require("crypto");
 const asyncHandellar = require("express-async-handler");
 
 exports.signup = asyncHandellar(async (req, res) => {
+  
+  const {name , password ,role , email } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
-
   const OTP_code = genrate_OTP();
 
-  const newUser = new User({
-    name,
-    password: hashedPassword,
-    email,
-    role,
-    OTP: OTP_code,
-    OTP_ExpiresAt: Date.now() + 5 * 60 * 1000,
-  });
-
-  const token = generateJwtandCookies.genrateJWT({
-    email: newUser.email,
-    role: newUser.role,
-    id: newUser._id,
-  });
+  const newUser = new User({ name , password: hashedPassword , email , role , OTP: OTP_code, OTP_ExpiresAt: Date.now() + 5 * 60 * 1000,});
+  const token = generateJwtandCookies.genrateJWT({ email: newUser.email,role: newUser.role,id: newUser._id,});
   newUser.token = token;
 
   await newUser.save();
 
   await send_Email.send_Auth_Email(newUser.email, newUser.OTP);
+  return res.status(201) .json({ status: httpStatusText.SUCCESS, data: newUser  , message: "OTP sent to email. Please verify your account."});
 
-  return res.status(201) .json({ status: httpStatusText.SUCCESS, data: newUser });
 });
 
 exports.login = asyncHandellar(async (req, res) => {
-  const { email, password, role } = req.body;
-
-  const matchedPassword = await bcrypt.compare(password, findUser.password);
+  const { email, password , role} = req.body;
+  const user = req.user;
+  const matchedPassword = await bcrypt.compare(password, user.password);
   if ( matchedPassword) {
-    const token = generateJwtandCookies.genrateJWT({
-      email: findUser.email,
-      role: findUser.role,
-      id: findUser._id,
-    });
+    const token = generateJwtandCookies.genrateJWT({ email: user.email,role: user.role,id: user._id,});
     generateJwtandCookies.setTokenInCookie(res, token);
     return res.status(200) .json({ status: httpStatusText.SUCCESS, message: { token } });
   } else {

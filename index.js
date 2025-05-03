@@ -17,6 +17,7 @@ const port = process.env.PORT;
 
 const authRoute = require('./routes/Auth/authRoute')
 const oauthRoute = require('./routes/OAuth/oauthRoute')
+const userRouter = require("./routes/user/userRoute");
 
 
 app.use(express.json());
@@ -37,6 +38,8 @@ app.use(passport.session());
 
 app.use("/api/auth", authRoute)
 app.use("/api/oauth", oauthRoute)
+app.use("/api/user",userRouter );
+
 
 
 app.all("*", (req, res, next) =>
@@ -44,9 +47,8 @@ app.all("*", (req, res, next) =>
 );
 
 app.use((error, req, res, next) => {
-  const status = error.status || "error";
   res.status(error.statusCode || 500).json({
-    status: error.status,
+    status: error.status || "error",
     message: error.message || "Internal Server Error",
     stack: error.stack,
   });
