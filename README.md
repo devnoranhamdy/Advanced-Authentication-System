@@ -18,6 +18,7 @@ A robust and secure authentication system built with **Node.js**, support multip
 - **Email Confirmation**
 - **Error Handling & Input Validation**
 - **Regex Validation for Inputs**
+- **Morgan (for logging HTTP requests)**
 
 ---
 
