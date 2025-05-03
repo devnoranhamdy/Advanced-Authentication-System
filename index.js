@@ -9,6 +9,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const cookieSession = require("cookie-session");
 const passportSetup = require("./utils/passportConfig");
 const dataBaseConnection = require("./config/dbConfig");
+const morgan = require("morgan");
 
 dataBaseConnection();
 
@@ -19,6 +20,11 @@ const authRoute = require('./routes/Auth/authRoute')
 const oauthRoute = require('./routes/OAuth/oauthRoute')
 const userRouter = require("./routes/user/userRoute");
 
+
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+  console.log(`mode : ${process.env.NODE_ENV}`);
+}
 
 app.use(express.json());
 app.use(cors());
