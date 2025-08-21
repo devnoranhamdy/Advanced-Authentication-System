@@ -17,7 +17,6 @@ const userShema = new mongoose.Schema(
       require: true,
       enum: [userRole.ADMIN, userRole.User],
     },
-    token: { type: String },
     avatar: { type: String },
     isValid: { type: Boolean, default: false },
     googleId: { type: String },
